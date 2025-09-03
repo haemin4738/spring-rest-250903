@@ -1,5 +1,6 @@
 package com.back.domain.post.post.controller;
 
+import com.back.domain.post.post.dto.PostDto;
 import com.back.domain.post.post.entity.Post;
 import com.back.domain.post.post.service.PostService;
 import lombok.RequiredArgsConstructor;
@@ -16,16 +17,20 @@ import java.util.List;
 public class APIV1PostController {
     private final PostService postService;
 
-    public List<Post> getItems() {
+    @GetMapping
+    public List<PostDto> getItems() {
         List<Post> items = postService.getList();
 
-        return items;
+        return items
+                .stream()
+                .map(post -> new PostDto(post)) // postDto 변환
+                .toList();
     }
 
     @GetMapping("/{id}")
-    public Post getItem(@PathVariable Long id) {
+    public PostDto getItem(@PathVariable Long id) {
         Post item = postService.getPost(id);
 
-        return item;
+        return new PostDto(item);
     }
 }
