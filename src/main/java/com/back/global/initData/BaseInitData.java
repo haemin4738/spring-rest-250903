@@ -14,6 +14,10 @@ public class BaseInitData {
     @Bean
     ApplicationRunner baseInitDataApplicationRunner(){
         return args -> {
+            if(postService.count() > 0) return;
+            postService.create("제목1", "내용1");
+            postService.create("제목2", "내용2");
+            postService.create("제목3", "내용3");
 
         };
     }
