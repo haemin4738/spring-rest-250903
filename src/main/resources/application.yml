@@ -1,6 +1,6 @@
 spring:
   application:
-    name: RESTAPI-0903
+    name: back
   profiles:
     active: dev
   output:
@@ -9,6 +9,9 @@ spring:
   datasource:
     hikari:
       auto-commit: false
+  jackson:
+    serialization:
+      fail-on-empty-beans: false
   jpa:
     show-sql: true
     hibernate:
