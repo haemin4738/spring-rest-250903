@@ -4,13 +4,13 @@ import com.back.domain.post.postComment.entity.PostComment;
 
 import java.time.LocalDateTime;
 
-public record PostCommentDto(
+public record PostCommentDto (
         long id,
         LocalDateTime createDate,
         LocalDateTime modifyDate,
         String content
 ) {
-    public PostCommentDto(PostComment postComment){
+    public PostCommentDto(PostComment postComment) {
         this(
                 postComment.getId(),
                 postComment.getCreateDate(),

@@ -3,6 +3,7 @@ package com.back.domain.post.post.controller;
 import com.back.domain.post.post.dto.PostDto;
 import com.back.domain.post.post.entity.Post;
 import com.back.domain.post.post.service.PostService;
+import com.back.global.rsData.RsData;
 import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -35,5 +36,15 @@ public class ApiV1PostController {
         Post item = postService.findById(id);
 
         return new PostDto(item);
+    }
+
+    @Transactional
+    @GetMapping("/{id}/delete")
+    public RsData<PostDto> delete(@PathVariable Long id) {
+        Post post = postService.findById(id);
+
+        postService.delete(post);
+
+        return new RsData<>("200-1", "%d번 게시글이 삭제되었습니다.".formatted(id), new PostDto(post));
     }
 }
