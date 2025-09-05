@@ -30,27 +30,27 @@ public class ResponseAspect {
      * 즉, REST API 응답을 반환하는 모든 컨트롤러 메서드를 대상으로 함
      */
     @Around("""
+                execution(public com.back.global.rsData.RsData *(..)) &&
                 (
-                    within(@org.springframework.web.bind.annotation.RestController *) &&
-                    (
-                        @annotation(org.springframework.web.bind.annotation.GetMapping) ||
-                        @annotation(org.springframework.web.bind.annotation.PostMapping) ||
-                        @annotation(org.springframework.web.bind.annotation.PutMapping) ||
-                        @annotation(org.springframework.web.bind.annotation.DeleteMapping) ||
-                        @annotation(org.springframework.web.bind.annotation.RequestMapping)
-                    )
-                ) ||
-                @annotation(org.springframework.web.bind.annotation.ResponseBody)
+                    within(@org.springframework.stereotype.Controller *) ||
+                    within(@org.springframework.web.bind.annotation.RestController *)
+                ) &&
+                (
+                    @annotation(org.springframework.web.bind.annotation.GetMapping) ||
+                    @annotation(org.springframework.web.bind.annotation.PostMapping) ||
+                    @annotation(org.springframework.web.bind.annotation.PutMapping) ||
+                    @annotation(org.springframework.web.bind.annotation.DeleteMapping) ||
+                    @annotation(org.springframework.web.bind.annotation.RequestMapping)
+                )
             """)
     public Object handleResponse(ProceedingJoinPoint joinPoint) throws Throwable {
         // 원래 컨트롤러 메서드 실행 (ex: write() 메서드 실행)
         Object proceed = joinPoint.proceed();
 
         // 반환값이 RsData라면, 그 안에 있는 statusCode를 HttpServletResponse에 반영
-        if (proceed instanceof RsData) {
-            RsData<?> rsData = (RsData<?>) proceed;
-            response.setStatus(rsData.statusCode()); // 예: 200, 400 등
-        }
+        RsData<?> rsData = (RsData<?>) proceed;
+        response.setStatus(rsData.statusCode());
+
         // 응답 본문은 그대로 클라이언트에게 전달
         return proceed;
     }
