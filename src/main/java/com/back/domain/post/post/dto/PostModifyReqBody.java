@@ -11,5 +11,4 @@ public record PostModifyReqBody(
         @Size(min = 2, max = 100)
         String content
 ) {
-
 }

@@ -51,26 +51,27 @@ public class ApiV1PostController {
 
     @PostMapping
     @Transactional
-    public RsData<PostWriteResBody> write(@Valid @RequestBody PostWriteReqBody form) {
-        Post post = postService.create(form.title(), form.content());
+    public RsData<PostWriteResBody> write(@Valid @RequestBody PostWriteReqBody reqBody) {
+        Post post = postService.create(reqBody.title(), reqBody.content());
 
 
         return new RsData<>(
-                "200-1",
-                "%d번 게시글이 작성되었습니다.".formatted(post.getId()),
+                "201-1",
+                "%d번 게시글이 생성되었습니다.".formatted(post.getId()),
                 new PostWriteResBody(postService.count(), new PostDto(post))
         );
     }
 
-    @PutMapping("{id}")
+    @PutMapping("/{id}")
     @Transactional
     public RsData<Void> modify(
             @PathVariable long id,
-            @Valid @RequestBody PostModifyReqBody reqBody){
+            @Valid @RequestBody PostModifyReqBody reqBody
+    ) {
         Post post = postService.findById(id);
-        postService.update(post, "제목 2", "내용 2");
+        postService.update(post, reqBody.title(), reqBody.content());
 
-        return new RsData<> (
+        return new RsData<>(
                 "200-1",
                 "%d번 게시글이 수정되었습니다.".formatted(id)
         );
