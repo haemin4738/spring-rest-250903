@@ -12,6 +12,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -43,5 +44,27 @@ public class ApiV1PostControllerTest {
         // 201 Created 상태코드 검증
         resultActions
                 .andExpect(status().isCreated());
+    }
+
+    // 회원가입 테스트
+    @Test
+    @DisplayName("글 수정")
+    void t2() throws Exception {
+        // 회원가입 요청을 보냅니다.
+        ResultActions resultActions = mvc
+                .perform(
+                        put("/api/v1/posts/1")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("""
+                                        {
+                                            "title": "제목 upadte",
+                                            "content": "내용 update"
+                                        }
+                                        """)
+                )
+                .andDo(print()); // 응답을 출력합니다.
+        // 200 OK 상태코드 검증
+        resultActions
+                .andExpect(status().isOk());
     }
 }
