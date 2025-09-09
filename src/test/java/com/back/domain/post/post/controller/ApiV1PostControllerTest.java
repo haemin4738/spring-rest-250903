@@ -14,8 +14,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import java.util.List;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -69,10 +70,12 @@ public class ApiV1PostControllerTest {
     @Test
     @DisplayName("글 수정")
     void t2() throws Exception {
+        long id = 1;
+
         //요청을 보냅니다.
         ResultActions resultActions = mvc
                 .perform(
-                        put("/api/v1/posts/1")
+                        put("/api/v1/posts/" + id)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content("""
                                         {
@@ -84,6 +87,115 @@ public class ApiV1PostControllerTest {
                 .andDo(print()); // 응답을 출력합니다.
         // 200 Ok 상태코드 검증
         resultActions
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(handler().handlerType(ApiV1PostController.class))
+                .andExpect(handler().methodName("modify"))
+                .andExpect(jsonPath("$.resultCode").value("200-1"))
+                .andExpect(jsonPath("$.msg").value("%d번 게시글이 수정되었습니다.".formatted(id)));
+
+//        Post post = postService.findById(id);
+//
+//        assertThat(post.getTitle().equals("제목 update"));
+//        assertThat(post.getContent().equals("내용 update"));
+    }
+
+    @Test
+    @DisplayName("글 삭제")
+    void t3() throws Exception {
+        long id = 1;
+
+        //요청을 보냅니다.
+        ResultActions resultActions = mvc
+                .perform(
+                        delete("/api/v1/posts/" + id)
+                )
+                .andDo(print()); // 응답을 출력합니다.
+
+        // 200 Ok 상태코드 검증
+        resultActions
+                .andExpect(status().isOk())
+                .andExpect(handler().handlerType(ApiV1PostController.class))
+                .andExpect(handler().methodName("delete"))
+                .andExpect(jsonPath("$.resultCode").value("200-1"))
+                .andExpect(jsonPath("$.msg").value("%d번 게시글이 삭제되었습니다.".formatted(id)));
+    }
+
+    @Test
+    @DisplayName("글 단건조회")
+    void t4() throws Exception {
+        long id = 1;
+
+        //요청을 보냅니다.
+        ResultActions resultActions = mvc
+                .perform(
+                        get("/api/v1/posts/" + id)
+                )
+                .andDo(print()); // 응답을 출력합니다.
+
+        Post post = postService.findById(id);
+
+        // 200 Ok 상태코드 검증
+        resultActions
+                .andExpect(status().isOk())
+                .andExpect(handler().handlerType(ApiV1PostController.class))
+                .andExpect(handler().methodName("getItem"))
+                .andExpect(jsonPath("$.id").value(post.getId()))
+                .andExpect(jsonPath("$.createDate").value(Matchers.startsWith(post.getCreateDate().toString().substring(0, 20))))
+                .andExpect(jsonPath("$.modifyDate").value(Matchers.startsWith(post.getModifyDate().toString().substring(0, 20))))
+                .andExpect(jsonPath("$.title").value(post.getTitle()))
+                .andExpect(jsonPath("$.content").value(post.getContent()));
+    }
+
+    @Test
+    @DisplayName("글 단건조회")
+    void t6() throws Exception {
+        long id = Integer.MAX_VALUE;
+
+        //요청을 보냅니다.
+        ResultActions resultActions = mvc
+                .perform(
+                        get("/api/v1/posts/" + id)
+                )
+                .andDo(print()); // 응답을 출력합니다.
+
+        // 404 Ok 상태코드 검증
+        resultActions
+                .andExpect(status().isNotFound())
+                .andExpect(handler().handlerType(ApiV1PostController.class))
+                .andExpect(handler().methodName("getItem"));
+    }
+
+
+    @Test
+    @DisplayName("글 다건조회")
+    void t5() throws Exception {
+
+        //요청을 보냅니다.
+        ResultActions resultActions = mvc
+                .perform(
+                        get("/api/v1/posts")
+                )
+                .andDo(print()); // 응답을 출력합니다.
+
+        List<Post> posts = postService.getList();
+
+
+        // 200 Ok 상태코드 검증
+        resultActions
+                .andExpect(status().isOk())
+                .andExpect(handler().handlerType(ApiV1PostController.class))
+                .andExpect(handler().methodName("getItems"))
+                .andExpect(jsonPath("$.length()").value(posts.size()));
+
+        for (int i =0; i < posts.size(); i++) {
+            Post post = posts.get(i);
+
+            resultActions
+                    .andExpect(jsonPath("$[%d].id".formatted(i)).value(post.getId()))
+                    .andExpect(jsonPath("$[%d].createDate".formatted(i)).value(Matchers.startsWith(post.getCreateDate().toString().substring(0, 20))))
+                    .andExpect(jsonPath("$[%d].modifyDate".formatted(i)).value(Matchers.startsWith(post.getModifyDate().toString().substring(0, 20))))
+                    .andExpect(jsonPath("$[%d].title".formatted(i)).value(post.getTitle()))
+                    .andExpect(jsonPath("$[%d].content".formatted(i)).value(post.getContent()));
+        }
     }
 }
