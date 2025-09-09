@@ -66,6 +66,37 @@ public class ApiV1PostControllerTest {
 
     }
 
+    @Test
+    @DisplayName("글 쓰기, title 누락")
+    void t7() throws Exception {
+        //요청을 보냅니다.
+        ResultActions resultActions = mvc
+                .perform(
+                        post("/api/v1/posts")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("""
+                                        {
+                                            "title": "",
+                                            "content": "내용"
+                                        }
+                                        """)
+                )
+                .andDo(print()); // 응답을 출력합니다.
+
+        Post post = postService.findLatest().get();
+
+        // 400 BadRequest 상태코드 검증
+        resultActions
+                .andExpect(handler().handlerType(ApiV1PostController.class))
+                .andExpect(handler().methodName("write"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.resultCode").value("400-1"))
+                .andExpect(jsonPath("$.msg").value("""
+                        title-NotBlank-must not be blank
+                        title-Size-size must be between 2 and 100
+                        """.stripIndent().trim()));
+    }
+
     //글 수정 테스트
     @Test
     @DisplayName("글 수정")
@@ -147,7 +178,7 @@ public class ApiV1PostControllerTest {
     }
 
     @Test
-    @DisplayName("글 단건조회")
+    @DisplayName("글 단건조회, 404")
     void t6() throws Exception {
         long id = Integer.MAX_VALUE;
 
