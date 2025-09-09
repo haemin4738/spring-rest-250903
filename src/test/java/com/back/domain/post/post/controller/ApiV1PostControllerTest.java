@@ -1,78 +1,89 @@
 package com.back.domain.post.post.controller;
 
-import com.back.domain.post.post.dto.PostDto;
-import com.back.domain.post.post.dto.PostModifyReqBody;
-import com.back.domain.post.post.dto.PostWriteReqBody;
 import com.back.domain.post.post.entity.Post;
 import com.back.domain.post.post.service.PostService;
-import com.back.global.rsData.RsData;
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
+import org.hamcrest.Matchers;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@RestController // @Controller + @ResponseBody
-@RequestMapping("/api/v1/posts")
-@RequiredArgsConstructor
-public class ApiV1PostController {
-    private final PostService postService;
+@ActiveProfiles("test") // 테스트 환경에서는 test 프로파일을 활성화합니다.
+@SpringBootTest // 스프링부트 테스트 클래스임을 나타냅니다.
+@AutoConfigureMockMvc // MockMvc를 자동으로 설정합니다.
+@Transactional // 각 테스트 메서드가 종료되면 롤백됩니다.
+public class ApiV1PostControllerTest {
+    @Autowired
+    private MockMvc mvc; // MockMvc를 주입받습니다.
 
-    @Transactional(readOnly = true)
-    @GetMapping
-    public List<PostDto> getItems() {
-        List<Post> items = postService.getList();
+    @Autowired
+    private PostService postService;
 
-        return items
-                .stream()
-                .map(PostDto::new) // postDto 변환
-                .toList();
+    //글쓰기 테스트
+    @Test
+    @DisplayName("글 쓰기")
+    void t1() throws Exception {
+        //요청을 보냅니다.
+        ResultActions resultActions = mvc
+                .perform(
+                        post("/api/v1/posts")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("""
+                                        {
+                                            "title": "제목",
+                                            "content": "내용"
+                                        }
+                                        """)
+                )
+                .andDo(print()); // 응답을 출력합니다.
+
+        Post post = postService.findLatest().get();
+
+        // 201 Created 상태코드 검증
+        resultActions
+                .andExpect(handler().handlerType(ApiV1PostController.class))
+                .andExpect(handler().methodName("write"))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.resultCode").value("201-1"))
+                .andExpect(jsonPath("$.msg").value("%d번 게시글이 생성되었습니다.".formatted(post.getId())))
+                .andExpect(jsonPath("$.data.id").value(post.getId()))
+                .andExpect(jsonPath("$.data.createDate").value(Matchers.startsWith(post.getCreateDate().toString().substring(0, 20))))
+                .andExpect(jsonPath("$.data.modifyDate").value(Matchers.startsWith(post.getModifyDate().toString().substring(0, 20))))
+                .andExpect(jsonPath("$.data.title").value("제목"))
+                .andExpect(jsonPath("$.data.content").value("내용"));
+
     }
 
-    @Transactional(readOnly = true)
-    @GetMapping("/{id}")
-    public PostDto getItem(@PathVariable Long id) {
-        Post item = postService.findById(id);
-
-        return new PostDto(item);
-    }
-
-    @Transactional
-    @DeleteMapping("/{id}")
-    public RsData<PostDto> delete(@PathVariable Long id) {
-        Post post = postService.findById(id);
-
-        postService.delete(post);
-
-        return new RsData<>("200-1", "%d번 게시글이 삭제되었습니다.".formatted(id), new PostDto(post));
-    }
-
-    @PostMapping
-    @Transactional
-    public RsData<PostDto> write(@Valid @RequestBody PostWriteReqBody reqBody) {
-        Post post = postService.create(reqBody.title(), reqBody.content());
-
-
-        return new RsData<>(
-                "201-1",
-                "%d번 게시글이 생성되었습니다.".formatted(post.getId()),
-                new PostDto(post)
-        );
-    }
-
-    @PutMapping("/{id}")
-    @Transactional
-    public RsData<Void> modify(
-            @PathVariable long id,
-            @Valid @RequestBody PostModifyReqBody reqBody
-    ) {
-        Post post = postService.findById(id);
-        postService.update(post, reqBody.title(), reqBody.content());
-
-        return new RsData<>(
-                "200-1",
-                "%d번 게시글이 수정되었습니다.".formatted(id)
-        );
+    //글 수정 테스트
+    @Test
+    @DisplayName("글 수정")
+    void t2() throws Exception {
+        //요청을 보냅니다.
+        ResultActions resultActions = mvc
+                .perform(
+                        put("/api/v1/posts/1")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("""
+                                        {
+                                            "title": "제목 update",
+                                            "content": "내용 update"
+                                        }
+                                        """)
+                )
+                .andDo(print()); // 응답을 출력합니다.
+        // 200 Ok 상태코드 검증
+        resultActions
+                .andExpect(status().isOk());
     }
 }
