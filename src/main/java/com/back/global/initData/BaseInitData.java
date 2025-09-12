@@ -1,5 +1,6 @@
 package com.back.global.initData;
 
+import com.back.domain.member.member.entity.Member;
 import com.back.domain.member.member.service.MemberService;
 import com.back.domain.post.post.entity.Post;
 import com.back.domain.post.post.service.PostService;
@@ -20,7 +21,7 @@ public class BaseInitData {
     private BaseInitData self;
 
     private final PostService postService;
-    private final MemberService memberservice;
+    private final MemberService memberService;
 
     @Bean
     ApplicationRunner baseInitDataApplicationRunner() {
@@ -34,28 +35,33 @@ public class BaseInitData {
 
     @Transactional
     public void work1() {
-        if (memberservice.count() > 0) return;
+        if (memberService.count() > 0) return;
 
-        memberservice.join("system", "1234", "시스템");
-        memberservice.join("admin", "1234", "관리자");
-        memberservice.join("user1", "1234", "유저1");
-        memberservice.join("user2", "1234", "유저2");
-        memberservice.join("user3", "1234", "유저3");
+        memberService.join("system", "1234", "시스템");
+        memberService.join("admin", "1234", "관리자");
+        memberService.join("user1", "1234", "유저1");
+        memberService.join("user2", "1234", "유저2");
+        memberService.join("user3", "1234", "유저3");
     }
 
     @Transactional
     public void work2() {
         if (postService.count() > 0) return;
 
-        Post post1 = postService.create("제목 1", "내용 1");
-        Post post2 = postService.create("제목 2", "내용 3");
-        Post post3 = postService.create("제목 3", "내용 3");
+        Member user1 = memberService.findByUsername("user1").get();
+        Member user2 = memberService.findByUsername("user2").get();
+        Member user3 = memberService.findByUsername("user3").get();
 
-        post1.addComment("댓글 1-1");
-        post1.addComment("댓글 1-2");
-        post1.addComment("댓글 1-3");
-        post2.addComment("댓글 2-1");
-        post2.addComment("댓글 2-2");
+
+        Post post1 = postService.create(user1, "제목 1", "내용 1");
+        Post post2 = postService.create(user2, "제목 2", "내용 3");
+        Post post3 = postService.create(user3, "제목 3", "내용 3");
+
+        post1.addComment(user1, "댓글 1-1");
+        post1.addComment(user1, "댓글 1-2");
+        post1.addComment(user2, "댓글 1-3");
+        post2.addComment(user2, "댓글 2-1");
+        post2.addComment(user3, "댓글 2-2");
     }
 
     @Transactional
