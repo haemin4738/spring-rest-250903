@@ -7,26 +7,31 @@ import com.back.domain.post.post.dto.PostModifyReqBody;
 import com.back.domain.post.post.dto.PostWriteReqBody;
 import com.back.domain.post.post.entity.Post;
 import com.back.domain.post.post.service.PostService;
+import com.back.global.exception.ServiceException;
 import com.back.global.rsData.RsData;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController // @Controller + @ResponseBody
+@Validated
 @RequestMapping("/api/v1/posts")
 @RequiredArgsConstructor
-@Tag(name = "ApiV1PostController", description = "API 글 컨트롤러")
+@Tag(name="ApiV1PostController", description = "API 글 컨트롤러")
 public class ApiV1PostController {
     private final PostService postService;
     private final MemberService memberService;
 
     @Transactional(readOnly = true)
-    @GetMapping // ("produces = APPLICATION_JSON_VALUE"는 스웨거에서 자동으로 인식함)
+    @GetMapping
     @Operation(summary = "다건 조회")
     public List<PostDto> getItems() {
         List<Post> items = postService.getList();
@@ -60,11 +65,14 @@ public class ApiV1PostController {
     @PostMapping
     @Transactional
     @Operation(summary = "작성")
-    public RsData<PostDto> write(@Valid @RequestBody PostWriteReqBody reqBody) {
-        Member author = memberService.findByUsername("user1").get();
+    public RsData<PostDto> write(
+            @Valid @RequestBody PostWriteReqBody reqBody,
+            @NotBlank @Size(min = 2, max = 50) String apiKey
+    ) {
+        Member author = memberService.findByApiKey(apiKey)
+                .orElseThrow(() -> new ServiceException("401-1", "존재하지 않는 회원입니다."));
 
         Post post = postService.create(author, reqBody.title(), reqBody.content());
-
 
         return new RsData<>(
                 "201-1",
