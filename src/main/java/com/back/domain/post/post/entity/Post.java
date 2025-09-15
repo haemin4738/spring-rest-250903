@@ -21,9 +21,8 @@ import static jakarta.persistence.FetchType.LAZY;
 @Getter
 @Entity
 public class Post extends BaseEntity {
-    @ManyToOne(fetch = LAZY)
+    @ManyToOne
     private Member author;
-
     private String title;
     private  String content;
 
