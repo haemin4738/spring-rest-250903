@@ -1,4 +1,3 @@
-
 package com.back.domain.member.member;
 
 
@@ -46,7 +45,7 @@ public class MemberControllerTest {
                                 .content("""
                                         {
                                                 "username": "usernew",
-                                                "password": "1234",
+                                                "password": "123456",
                                                 "nickname": "유저new"
                                         }
                                         """)
