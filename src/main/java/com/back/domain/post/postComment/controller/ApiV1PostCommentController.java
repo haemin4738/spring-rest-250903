@@ -63,9 +63,14 @@ public class ApiV1PostCommentController {
     @Operation(summary = "삭제")
     public RsData<Void> delete(
             @PathVariable long postId,
-            @PathVariable long id
+            @PathVariable long id,
+            @NotBlank @Size(min = 2, max = 50) @RequestHeader("Authorization") String authorization
     ) {
         Post post = postService.findById(postId);
+
+        String apiKey = authorization.replace("Bearer ", "");
+        Member author = memberService.findByApiKey(apiKey)
+                .orElseThrow(() -> new ServiceException("401-1", "존재하지 않는 회원입니다."));
 
         PostComment postComment = post.findCommentById(id).get();
 
