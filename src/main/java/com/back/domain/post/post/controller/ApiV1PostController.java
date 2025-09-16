@@ -32,8 +32,6 @@ public class ApiV1PostController {
     @GetMapping
     @Operation(summary = "다건 조회")
     public List<PostDto> getItems() {
-        System.out.println("memberService : " + memberService);
-        System.out.println("rq : " + rq);
 
         List<Post> items = postService.getList();
 
