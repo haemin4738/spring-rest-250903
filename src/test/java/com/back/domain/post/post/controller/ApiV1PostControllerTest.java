@@ -148,7 +148,7 @@ public class ApiV1PostControllerTest {
                                 .content("""
                                         {
                                             "title": "제목",
-                                            content": "내용"
+                                            "content": "내용"
                                         }
                                         """)
                 )
@@ -169,11 +169,15 @@ public class ApiV1PostControllerTest {
     void t2() throws Exception {
         long id = 1;
 
+        Post post = postService.findById(id);
+        String apiKey = post.getAuthor().getApiKey();
+
         //요청을 보냅니다.
         ResultActions resultActions = mvc
                 .perform(
                         put("/api/v1/posts/" + id)
                                 .contentType(MediaType.APPLICATION_JSON)
+                                .header("Authorization", "Bearer " + apiKey)
                                 .content("""
                                         {
                                             "title": "제목 update",
