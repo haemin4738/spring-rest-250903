@@ -1,4 +1,3 @@
-
 package com.back.domain.post.post.controller;
 
 import com.back.domain.member.member.entity.Member;
@@ -42,12 +41,13 @@ public class ApiV1PostControllerTest {
     void t1() throws Exception {
         Member member = memberService.findByUsername("user1").get();
 
-        String authorApiKey = member.getApiKey();
+        String apiKey = member.getApiKey();
 
         //요청을 보냅니다.
         ResultActions resultActions = mvc
                 .perform(
-                        post("/api/v1/posts?apiKey=" + authorApiKey)
+                        post("/api/v1/posts")
+                                .header("Authorization", "Bearer " + apiKey)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content("""
                                         {
@@ -148,7 +148,7 @@ public class ApiV1PostControllerTest {
                                 .content("""
                                         {
                                             "title": "제목",
-                                            "content": "내용"
+                                            content": "내용"
                                         }
                                         """)
                 )
@@ -170,6 +170,7 @@ public class ApiV1PostControllerTest {
         long id = 1;
 
         Post post = postService.findById(id);
+
         String apiKey = post.getAuthor().getApiKey();
 
         //요청을 보냅니다.
