@@ -1,4 +1,3 @@
-
 package com.back.domain.post.post.controller;
 
 import com.back.domain.member.member.entity.Member;
@@ -66,6 +65,10 @@ public class ApiV1PostController {
 
 
         Post post = postService.findById(id);
+
+        if (!author.equals(post.getAuthor())) {
+            throw new ServiceException("403-1", "글 삭제 권한이 없습니다.");
+        }
 
         postService.delete(post);
 
