@@ -8,7 +8,7 @@ import com.back.domain.post.postComment.dto.PostCommentDto;
 import com.back.domain.post.postComment.dto.PostCommentModifyReqBody;
 import com.back.domain.post.postComment.dto.PostCommentWriteReqBody;
 import com.back.domain.post.postComment.entity.PostComment;
-import com.back.global.exception.ServiceException;
+import com.back.global.Rq.Rq;
 import com.back.global.rsData.RsData;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -28,6 +28,7 @@ import java.util.List;
 public class ApiV1PostCommentController {
     private final PostService postService;
     private final MemberService memberService;
+    private final Rq rq;
 
     @Transactional(readOnly = true)
     @GetMapping
@@ -66,10 +67,7 @@ public class ApiV1PostCommentController {
             @PathVariable long id,
             @NotBlank @Size(min = 2, max = 50) @RequestHeader("Authorization") String authorization
     ) {
-        String apiKey = authorization.replace("Bearer ", "");
-
-        Member author = memberService.findByApiKey(apiKey)
-                .orElseThrow(() -> new ServiceException("401-1", "존재하지 않는 회원입니다."));
+        Member author = rq.getAuthor();
 
 
         Post post = postService.findById(postId);
@@ -93,10 +91,7 @@ public class ApiV1PostCommentController {
             @NotBlank @Size(min = 2, max = 50) @RequestHeader("Authorization") String authorization
     ) {
 
-        String apiKey = authorization.replace("Bearer ", "");
-
-        Member author = memberService.findByApiKey(apiKey)
-                .orElseThrow(() -> new ServiceException("401-1", "존재하지 않는 회원입니다."));
+        Member author = rq.getAuthor();
 
         Post post = postService.findById(postId);
 
@@ -121,10 +116,7 @@ public class ApiV1PostCommentController {
             @NotBlank @Size(min = 2, max = 50) @RequestHeader("Authorization") String authorization
     ) {
 
-        String apiKey = authorization.replace("Bearer ", "");
-
-        Member author = memberService.findByApiKey(apiKey)
-                .orElseThrow(() -> new ServiceException("401-1", "존재하지 않는 회원입니다."));
+        Member author = rq.getAuthor();
 
         Post post = postService.findById(postId);
 
