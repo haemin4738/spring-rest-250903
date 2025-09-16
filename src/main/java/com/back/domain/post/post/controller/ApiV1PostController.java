@@ -93,7 +93,7 @@ public class ApiV1PostController {
         Post post = postService.findById(id);
         postService.update(post, reqBody.title(), reqBody.content());
 
-        post.checkAutorCanDelete(actor);
+        post.checkAuthorCanDelete(actor);
 
         return new RsData<>(
                 "200-1",

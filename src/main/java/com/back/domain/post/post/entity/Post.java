@@ -25,7 +25,7 @@ public class Post extends BaseEntity {
     @ManyToOne
     private Member author;
     private String title;
-    private String content;
+    private  String content;
 
     /**
      * mappedBy = "post" : 관계의 주인은 PostComment.post (자식이 FK 보유)
@@ -66,7 +66,7 @@ public class Post extends BaseEntity {
      * - LAZY: comments 접근 시점에 필요하면 쿼리 발생
      * - 컬렉션 내에서 id로 필터링 (영속성 컨텍스트/1차 캐시 + 초기화된 컬렉션 범위 내 탐색)
      */
-    public Optional<PostComment> findCommentById(long id) {
+    public Optional<PostComment> findCommentById (long id) {
         return comments
                 .stream()
                 .filter(comment -> comment.getId() == id)
@@ -77,7 +77,7 @@ public class Post extends BaseEntity {
      * deleteComment
      * - comments.remove(child) 하면 orphanRemoval=true 덕분에 해당 자식이 "고아"로 판단되어 DELETE
      * - 단, 연관관계의 주인은 자식(PostComment.post)이므로 child.setPost(null) 까지 끊어주는 것이 안전
-     * (양방향 헬퍼 관례: add/remove 시 항상 양쪽을 함께 정리)
+     *   (양방향 헬퍼 관례: add/remove 시 항상 양쪽을 함께 정리)
      * - 부모 자체를 삭제하면 cascade=REMOVE 로 자식 전체가 자동 삭제
      */
     public boolean deleteComment(PostComment postComment) {
@@ -86,15 +86,15 @@ public class Post extends BaseEntity {
         return comments.remove(postComment);
     }
 
-    public void checkAutorCanModify(Member author) {
-        if (!author.equals(this.author)) {
-            throw new ServiceException("403-1", "글 수정 권한이 없습니다.");
+    public void checkAutorCanModify(Member actor) {
+        if (!actor.equals(author)) {
+            throw new ServiceException("403-1", "%d번 글 삭제 권한이 없습니다.".formatted(getId()));
         }
     }
 
-    public void checkAutorCanDelete(Member author) {
-        if (!author.equals(this.author)) {
-            throw new ServiceException("403-1", "글 삭제 권한이 없습니다.");
+    public void checkAuthorCanDelete(Member actor) {
+        if (!actor.equals(author)) {
+            throw new ServiceException("403-1", "%d번 글 수정 권한이 없습니다.".formatted(getId()));
         }
     }
 }
