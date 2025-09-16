@@ -13,8 +13,6 @@ import com.back.global.rsData.RsData;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -64,17 +62,15 @@ public class ApiV1PostCommentController {
     @Operation(summary = "삭제")
     public RsData<Void> delete(
             @PathVariable long postId,
-            @PathVariable long id,
-            @NotBlank @Size(min = 2, max = 50) @RequestHeader("Authorization") String authorization
+            @PathVariable long id
     ) {
-        Member author = rq.getAuthor();
-
+        Member actor = rq.getAuthor();
 
         Post post = postService.findById(postId);
 
         PostComment postComment = post.findCommentById(id).get();
 
-        postComment.checkAutorCanDelete(author);
+        postComment.checkAuthorCanDelete(actor);
 
         postService.deleteComment(post, postComment);
 
@@ -87,17 +83,15 @@ public class ApiV1PostCommentController {
     public RsData<Void> modify(
             @PathVariable long postId,
             @PathVariable long id,
-            @Valid @RequestBody PostCommentModifyReqBody reqBody,
-            @NotBlank @Size(min = 2, max = 50) @RequestHeader("Authorization") String authorization
+            @Valid @RequestBody PostCommentModifyReqBody reqBody
     ) {
-
-        Member author = rq.getAuthor();
+        Member actor = rq.getAuthor();
 
         Post post = postService.findById(postId);
 
         PostComment postComment = post.findCommentById(id).get();
 
-        postComment.checkAutorCanModify(author);
+        postComment.checkAuthorCanModify(actor);
 
         postService.modifyComment(postComment, reqBody.content());
 
@@ -112,15 +106,13 @@ public class ApiV1PostCommentController {
     @Operation(summary = "작성")
     public RsData<PostCommentDto> write(
             @PathVariable long postId,
-            @Valid @RequestBody PostCommentWriteReqBody reqBody,
-            @NotBlank @Size(min = 2, max = 50) @RequestHeader("Authorization") String authorization
+            @Valid @RequestBody PostCommentWriteReqBody reqBody
     ) {
-
-        Member author = rq.getAuthor();
+        Member actor = rq.getAuthor();
 
         Post post = postService.findById(postId);
 
-        PostComment postComment = postService.writeComment(author, post, reqBody.content());
+        PostComment postComment = postService.writeComment(actor, post, reqBody.content());
 
         // 트렌잭션 끝난 후 수행되야 하는 더티체킹 및 여가지 작업들을 지금 당장 수행시킴
         postService.flush();
