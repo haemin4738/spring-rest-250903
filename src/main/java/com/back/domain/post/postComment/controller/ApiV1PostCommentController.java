@@ -76,9 +76,7 @@ public class ApiV1PostCommentController {
 
         PostComment postComment = post.findCommentById(id).get();
 
-        if (!author.equals(postComment.getAuthor())) {
-            throw new ServiceException("403-1", "댓글 삭제 권한이 없습니다.");
-        }
+        postComment.checkAutorCanDelete(author);
 
         postService.deleteComment(post, postComment);
 
@@ -104,9 +102,7 @@ public class ApiV1PostCommentController {
 
         PostComment postComment = post.findCommentById(id).get();
 
-        if (!author.equals(postComment.getAuthor())) {
-            throw new ServiceException("403-1", "댓글 수정 권한이 없습니다.");
-        }
+        postComment.checkAutorCanModify(author);
 
         postService.modifyComment(postComment, reqBody.content());
 
