@@ -28,7 +28,7 @@ public class BaseInitData {
         return args -> {
             self.work1();
             self.work2();
-            self.work3();
+//            self.work3();
         };
 
     }
@@ -37,36 +37,47 @@ public class BaseInitData {
     public void work1() {
         if (memberService.count() > 0) return;
 
-        memberService.join("system", "1234", "시스템");
-        memberService.join("admin", "1234", "관리자");
-        memberService.join("user1", "1234", "유저1");
-        memberService.join("user2", "1234", "유저2");
-        memberService.join("user3", "1234", "유저3");
+        Member memberSystem = memberService.join("system", "1234", "시스템");
+        memberSystem.modifyApiKey(memberSystem.getUsername());
+
+        Member memberAdmin = memberService.join("admin", "1234", "관리자");
+        memberAdmin.modifyApiKey(memberAdmin.getUsername());
+
+        Member memberUser1 = memberService.join("user1", "1234", "유저1");
+        memberUser1.modifyApiKey(memberUser1.getUsername());
+
+        Member memberUser2 = memberService.join("user2", "1234", "유저2");
+        memberUser2.modifyApiKey(memberUser2.getUsername());
+
+        Member memberUser3 = memberService.join("user3", "1234", "유저3");
+        memberUser3.modifyApiKey(memberUser3.getUsername());
     }
 
     @Transactional
     public void work2() {
         if (postService.count() > 0) return;
 
-        Member user1 = memberService.findByUsername("user1").get();
-        Member user2 = memberService.findByUsername("user2").get();
-        Member user3 = memberService.findByUsername("user3").get();
+        Member memberUser1 = memberService.findByUsername("user1").get();
+        Member memberUser2 = memberService.findByUsername("user2").get();
+        Member memberUser3 = memberService.findByUsername("user3").get();
 
+        Post post1 = postService.create(memberUser1, "제목 1", "내용 1");
+        Post post2 = postService.create(memberUser1, "제목 2", "내용 2");
+        Post post3 = postService.create(memberUser2,"제목 3", "내용 3");
+        Post post4 = postService.create(memberUser2,"제목 4", "내용 4");
+        Post post5 = postService.create(memberUser2,"제목 5", "내용 5");
 
-        Post post1 = postService.create(user1, "제목 1", "내용 1");
-        Post post2 = postService.create(user2, "제목 2", "내용 3");
-        Post post3 = postService.create(user3, "제목 3", "내용 3");
-
-        post1.addComment(user1, "댓글 1-1");
-        post1.addComment(user1, "댓글 1-2");
-        post1.addComment(user2, "댓글 1-3");
-        post2.addComment(user2, "댓글 2-1");
-        post2.addComment(user3, "댓글 2-2");
+        post1.addComment(memberUser1,"댓글 1-1");
+        post1.addComment(memberUser1,"댓글 1-2");
+        post1.addComment(memberUser2,"댓글 1-3");
+        post2.addComment(memberUser3,"댓글 2-1");
+        post2.addComment(memberUser3,"댓글 2-2");
+        post3.addComment(memberUser3,"댓글 3-1");
+        post3.addComment(memberUser3,"댓글 3-2");
     }
 
     @Transactional
     public void work3() {
 
     }
-
 }
