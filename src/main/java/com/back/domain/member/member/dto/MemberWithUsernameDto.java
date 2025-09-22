@@ -4,7 +4,7 @@ import com.back.domain.member.member.entity.Member;
 
 import java.time.LocalDateTime;
 
-public record MemberWtihtUsernameDto(
+public record MemberWithUsernameDto(
         long id,
         LocalDateTime createDate,
         LocalDateTime modifyDate,
@@ -12,7 +12,7 @@ public record MemberWtihtUsernameDto(
         String username
 ) {
 
-    public MemberWtihtUsernameDto(Member member) {
+    public MemberWithUsernameDto(Member member) {
         this(
                 member.getId(),
                 member.getCreateDate(),
