@@ -37,4 +37,12 @@ public class Member extends BaseEntity {
     public void modifyApiKey(String apiKey) {
         this.apiKey = apiKey;
     }
+
+    public boolean isAdmin() {
+        if("system".equals(this.username)) return true;
+        if("admin".equals(this.username)) return true;
+
+        return false;
+
+    }
 }
