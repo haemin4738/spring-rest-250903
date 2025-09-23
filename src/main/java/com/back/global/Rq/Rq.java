@@ -68,9 +68,14 @@ public class Rq {
         Cookie cookie = new Cookie(name, value);
         cookie.setPath("/"); // 쿠키를 도메인 전체에서 쓰겠다.
         cookie.setHttpOnly(true); // 쿠키를 스크립트로 접근 못하게(XSS 공격방어)
+        cookie.setDomain("localhost");
+        cookie.setSecure(true);
+        cookie.setAttribute("sameSite","Strict");
 
         if (value.isBlank()) {
             cookie.setMaxAge(0);
+        } else {
+            cookie.setMaxAge(60 * 60 * 24 * 365); // 1년
         }
 
         resp.addCookie(cookie);
