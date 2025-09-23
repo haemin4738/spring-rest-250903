@@ -20,8 +20,8 @@ public class SecurityConfig {
                         auth -> auth
                                 .requestMatchers("favicon.ico").permitAll()
                                 .requestMatchers("/h2-console/**").permitAll()
+                                .requestMatchers("/api/*/adm/**").hasRole("ADMIN") // 관리자 권한 체크(선언적으로 인가 처리)
                                 .requestMatchers("/**").permitAll()
-                                .requestMatchers("/api/v1/adm/**").hasRole("ADMIN") // 관리자 권한 체크(선언적으로 인가 처리)
                                 .anyRequest().authenticated()
                 )
                 .headers(
@@ -38,35 +38,34 @@ public class SecurityConfig {
                                 .authenticationEntryPoint(
                                         (request, response, authException) -> {
                                             response.setContentType("application/json;charset=UTF-8");
+
                                             response.setStatus(401);
                                             response.getWriter().write(
                                                     """
-                                                        {
-                                                            "resultCode": "401-1",
-                                                            "msg": "로그인 후 사용하세요."
-                                                        }
-                                                        """
+                                                            {
+                                                                 "resultCode": "401-1",
+                                                                 "msg": "로그인 후 사용해주세요."
+                                                            }
+                                                            """
                                             );
                                         }
                                 )
                                 .accessDeniedHandler(
-                                        (request, response, authException) -> {
+                                        (request, response, accessDeniedException) -> {
                                             response.setContentType("application/json;charset=UTF-8");
+
                                             response.setStatus(403);
                                             response.getWriter().write(
                                                     """
-                                                        {
-                                                            "resultCode": "403-1",
-                                                            "msg": "권한이 없습니다."
-                                                        }
-                                                        """
+                                                            {
+                                                                 "resultCode": "403-1",
+                                                                 "msg": "권한이 없습니다."
+                                                            }
+                                                            """
                                             );
                                         }
                                 )
                 );
-
-
-
         return http.build();
     }
 }

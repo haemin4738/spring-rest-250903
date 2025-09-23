@@ -116,6 +116,7 @@ public class ApiV1AdmMemberControllerTest {
     @DisplayName("단건조회, without permission")
     void t4() throws Exception {
         int id = 1;
+
         Member actor = memberService.findByUsername("user1").get();
         String actorApiKey = actor.getApiKey();
 
