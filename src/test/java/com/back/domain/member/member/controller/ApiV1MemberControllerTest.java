@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -25,7 +26,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
-public class MemberControllerTest {
+public class ApiV1MemberControllerTest {
 
     @Autowired
     private MockMvc mvc; // MockMvc를 주입받습니다.
@@ -118,14 +119,11 @@ public class MemberControllerTest {
 
     @Test
     @DisplayName("내 정보")
+    @WithUserDetails("user1")
     void t3() throws Exception {
-        Member actor = memberService.findByUsername("user1").get();
-        String apiKey = actor.getApiKey();
-
         ResultActions resultActions = mvc
                 .perform(
                         get("/api/v1/members/me")
-                                .header("Authorization", "Bearer " + apiKey)
                 )
                 .andDo(print());
 
@@ -146,14 +144,12 @@ public class MemberControllerTest {
 
     @Test
     @DisplayName("내 정보, with apiKey Cookie")
+    @WithUserDetails("user1")
     void t4() throws Exception {
-        Member actor =  memberService.findByUsername("user1").get();
-        String apiKey = actor.getApiKey();
 
         ResultActions resultActions = mvc
                 .perform(
                         get("/api/v1/members/me")
-                                .cookie(new Cookie("apiKey", apiKey))
                 )
                 .andDo(print());
 
@@ -230,5 +226,21 @@ public class MemberControllerTest {
                     assertThat(headerAuthorization).isEqualTo(accessTokenCookie.getValue());
                 }
         );
+    }
+
+    @Test
+    @DisplayName("Authorization 헤더 Bearer 형식이 아닐 때 오류")
+    void t7 () throws Exception {
+        ResultActions resultActions = mvc
+                .perform(
+                        get("/api/v1/members/me")
+                                .header("Authorization", "key")
+                )
+                .andDo(print());
+
+        resultActions
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.resultCode").value("401-2"))
+                .andExpect(jsonPath("$.msg").value("인증 정보가 올바르지 않습니다."));
     }
 }
